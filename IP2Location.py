@@ -730,15 +730,15 @@ class IP2LocationWebService(object):
     """ IP2Location web service """
 
     def __init__(self, apikey, package, usessl=True):
-        if (re.match(r"^[0-9A-Z]{10}$", apikey) == None) and (apikey != "demo"):
+        if (re.match(r"^[0-9A-Z]{10}$", apikey) is None) and (apikey != "demo"):
             raise ValueError("Please provide a valid IP2Location web service API key.")
-        if re.match(r"^WS[0-9]+$", package) == None:
+        if re.match(r"^WS[0-9]+$", package) is None:
             package = "WS1"
         self.apikey = apikey
         self.package = package
         self.usessl = usessl
 
-    def lookup(self, ip, addons=[], language="en"):
+    def lookup(self, ip, addons=(), language="en"):
         """This function will look the given IP address up in IP2Location web service."""
         parameters = urlencode(
             (
@@ -750,7 +750,7 @@ class IP2LocationWebService(object):
             )
         )
         response = httprequest(parameters, self.usessl)
-        if response == None:
+        if response is None:
             return False
         if "response" in response:
             raise IP2LocationAPIError(response["response"])
@@ -760,7 +760,7 @@ class IP2LocationWebService(object):
         """Get the remaing credit in your IP2Location web service account."""
         parameters = urlencode((("key", self.apikey), ("check", True)))
         response = httprequest(parameters, self.usessl)
-        if response == None:
+        if response is None:
             return 0
         if "response" in response is False:
             return 0
