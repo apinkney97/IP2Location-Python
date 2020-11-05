@@ -22,7 +22,7 @@ if sys.version < "3":
             conn.request("GET", "/v2/?" + x)
             res = conn.getresponse()
             return json.loads(res.read())
-        except:
+        except Exception:
             return None
 
     def u(x):
@@ -49,7 +49,7 @@ else:
             conn.request("GET", "/v2/?" + x)
             res = conn.getresponse()
             return json.loads(res.read())
-        except:
+        except Exception:
             return None
 
     def u(x):
@@ -643,7 +643,7 @@ class IP2Location(object):
                 try:
                     socket.inet_pton(socket.AF_INET, addr)
                     ipv = 4
-                except:
+                except Exception:
                     # reformat ipv4 address in ipv6
                     if (ipnum >= 281470681743360) and (ipnum <= 281474976710655):
                         ipv = 4
@@ -667,7 +667,7 @@ class IP2Location(object):
                     ipnum = ipnum % 4294967296
                 else:
                     ipv = 6
-        except:
+        except Exception:
             ipnum = struct.unpack("!L", socket.inet_pton(socket.AF_INET, addr))[0]
             # socket.inet_pton(socket.AF_INET, addr)
             ipv = 4
