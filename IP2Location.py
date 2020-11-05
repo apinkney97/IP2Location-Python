@@ -196,102 +196,82 @@ class IP2Location(object):
             del self._f
 
     def get_country_short(self, ip):
-        """ Get country_short """
         rec = self.get_all(ip)
         return rec and rec.country_short
 
     def get_country_long(self, ip):
-        """ Get country_long """
         rec = self.get_all(ip)
         return rec and rec.country_long
 
     def get_region(self, ip):
-        """ Get region """
         rec = self.get_all(ip)
         return rec and rec.region
 
     def get_city(self, ip):
-        """ Get city """
         rec = self.get_all(ip)
         return rec and rec.city
 
     def get_isp(self, ip):
-        """ Get isp """
         rec = self.get_all(ip)
         return rec and rec.isp
 
     def get_latitude(self, ip):
-        """ Get latitude """
         rec = self.get_all(ip)
         return rec and rec.latitude
 
     def get_longitude(self, ip):
-        """ Get longitude """
         rec = self.get_all(ip)
         return rec and rec.longitude
 
     def get_domain(self, ip):
-        """ Get domain """
         rec = self.get_all(ip)
         return rec and rec.domain
 
     def get_zipcode(self, ip):
-        """ Get zipcode """
         rec = self.get_all(ip)
         return rec and rec.zipcode
 
     def get_timezone(self, ip):
-        """ Get timezone """
         rec = self.get_all(ip)
         return rec and rec.timezone
 
     def get_netspeed(self, ip):
-        """ Get netspeed """
         rec = self.get_all(ip)
         return rec and rec.netspeed
 
     def get_idd_code(self, ip):
-        """ Get idd_code """
         rec = self.get_all(ip)
         return rec and rec.idd_code
 
     def get_area_code(self, ip):
-        """ Get area_code """
         rec = self.get_all(ip)
         return rec and rec.area_code
 
     def get_weather_code(self, ip):
-        """ Get weather_code """
         rec = self.get_all(ip)
         return rec and rec.weather_code
 
     def get_weather_name(self, ip):
-        """ Get weather_name """
         rec = self.get_all(ip)
         return rec and rec.weather_name
 
     def get_mcc(self, ip):
-        """ Get mcc """
         rec = self.get_all(ip)
         return rec and rec.mcc
 
     def get_mnc(self, ip):
-        """ Get mnc """
         rec = self.get_all(ip)
         return rec and rec.mnc
 
     def get_mobile_brand(self, ip):
-        """ Get mobile_brand """
         rec = self.get_all(ip)
         return rec and rec.mobile_brand
 
     def get_elevation(self, ip):
-        """ Get elevation """
         rec = self.get_all(ip)
         return rec and rec.elevation
 
     def get_usage_type(self, ip):
-        """ Get usage_type """
         rec = self.get_all(ip)
         return rec and rec.usage_type
 
