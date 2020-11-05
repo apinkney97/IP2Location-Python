@@ -116,8 +116,8 @@ class IP2LocationRecord:
         return repr(self.__dict__)
 
 
-MAX_IPV4_RANGE = 2**32 - 1
-MAX_IPV6_RANGE = 2**128 - 1
+MAX_IPV4_RANGE = 2 ** 32 - 1
+MAX_IPV6_RANGE = 2 ** 128 - 1
 
 # fmt: off
 _COUNTRY_POSITION            = (0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,  2, 2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2)
@@ -652,15 +652,23 @@ class IP2Location(object):
                         ipv = 6
             else:
                 # reformat 6to4 address to ipv4 address 2002:: to 2002:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF
-                if 0x20020000000000000000000000000000<= ipnum <= 0x2002FFFFFFFFFFFFFFFFFFFFFFFFFFFF:
+                if (
+                    0x20020000000000000000000000000000
+                    <= ipnum
+                    <= 0x2002FFFFFFFFFFFFFFFFFFFFFFFFFFFF
+                ):
                     ipv = 4
                     ipnum = ipnum >> 80
                     ipnum = ipnum % 4294967296
                 # reformat Teredo address to ipv4 address 2001:0000:: to 2001:0000:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:
-                elif 0x20010000000000000000000000000000 <= ipnum <= 0x20010000FFFFFFFFFFFFFFFFFFFFFFFF:
+                elif (
+                    0x20010000000000000000000000000000
+                    <= ipnum
+                    <= 0x20010000FFFFFFFFFFFFFFFFFFFFFFFF
+                ):
                     ipv = 4
                     ipnum = ~ipnum
-                    ipnum = ipnum % (2**32)
+                    ipnum = ipnum % (2 ** 32)
                 else:
                     ipv = 6
         except Exception:
