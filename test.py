@@ -7,6 +7,7 @@
 
 import os
 import sys
+
 import IP2Location
 
 database = IP2Location.IP2Location()
@@ -24,8 +25,10 @@ for line in open(os.path.join("data", "country_test_ipv4_data.txt")):
     if rec is not None:
         if rec.country_short != country_short:
             failed += 1
-            print("Test IP Address %s (Test %d) failed. We got %s but expected %s" \
-                    % (addr, test_num, rec and rec.country_short or 'None', country_short))
+            print(
+                "Test IP Address %s (Test %d) failed. We got %s but expected %s"
+                % (addr, test_num, rec and rec.country_short or "None", country_short)
+            )
         else:
             passed += 1
 
@@ -38,10 +41,12 @@ for line in open(os.path.join("data", "country_test_ipv6_data.txt")):
     if rec is not None:
         if rec.country_short != country_short:
             failed += 1
-            print("Test IP Address %s (Test %d) failed. We got %s but expected %s" \
-                    % (addr, test_num, rec and rec.country_short or 'None', country_short))
+            print(
+                "Test IP Address %s (Test %d) failed. We got %s but expected %s"
+                % (addr, test_num, rec and rec.country_short or "None", country_short)
+            )
         else:
             passed += 1
 
-print('PASS: %d' % (passed))
-print('FAIL: %d' % (failed))
+print("PASS: %d" % (passed))
+print("FAIL: %d" % (failed))

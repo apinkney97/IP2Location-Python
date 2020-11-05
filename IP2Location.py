@@ -1,17 +1,21 @@
-import sys
-import struct
-import socket
-import re
 import json
+import re
+import socket
+import struct
+import sys
 
-if sys.version < '3':
-    import urllib, httplib
+if sys.version < "3":
+    import urllib
+
+    import httplib
+
     def urlencode(x):
         return urllib.urlencode(x)
+
     def httprequest(x, usessl):
         try:
             # conn = httplib.HTTPConnection("api.ip2location.com")
-            if (usessl is True):
+            if usessl is True:
                 conn = httplib.HTTPSConnection("api.ip2location.com")
             else:
                 conn = httplib.HTTPConnection("api.ip2location.com")
@@ -20,18 +24,25 @@ if sys.version < '3':
             return json.loads(res.read())
         except:
             return None
+
     def u(x):
-        return x.decode('utf-8')
+        return x.decode("utf-8")
+
     def b(x):
         return str(x)
+
+
 else:
-    import urllib.parse, http.client
+    import http.client
+    import urllib.parse
+
     def urlencode(x):
         return urllib.parse.urlencode(x)
+
     def httprequest(x, usessl):
         try:
             # conn = http.client.HTTPConnection("api.ip2location.com")
-            if (usessl is True):
+            if usessl is True:
                 conn = http.client.HTTPSConnection("api.ip2location.com")
             else:
                 conn = http.client.HTTPConnection("api.ip2location.com")
@@ -40,21 +51,26 @@ else:
             return json.loads(res.read())
         except:
             return None
+
     def u(x):
         if isinstance(x, bytes):
             return x.decode()
         return x
+
     def b(x):
         if isinstance(x, bytes):
             return x
-        return x.encode('ascii')
-        
+        return x.encode("ascii")
+
+
 # Windows version of Python does not provide it
 #          for compatibility with older versions of Windows.
-if not hasattr(socket, 'inet_pton'):
+if not hasattr(socket, "inet_pton"):
+
     def inet_pton(t, addr):
         import ctypes
-        a = ctypes.WinDLL('ws2_32.dll')
+
+        a = ctypes.WinDLL("ws2_32.dll")
         in_addr_p = ctypes.create_string_buffer(b(addr))
         if t == socket.AF_INET:
             out_addr_p = ctypes.create_string_buffer(4)
@@ -62,12 +78,15 @@ if not hasattr(socket, 'inet_pton'):
             out_addr_p = ctypes.create_string_buffer(16)
         n = a.inet_pton(t, in_addr_p, out_addr_p)
         if n == 0:
-            raise ValueError('Invalid address')
+            raise ValueError("Invalid address")
         return out_addr_p.raw
+
     socket.inet_pton = inet_pton
 
+
 class IP2LocationRecord:
-    ''' IP2Location record with all fields from the database '''
+    """ IP2Location record with all fields from the database """
+
     ip = None
     country_short = None
     country_long = None
@@ -96,42 +115,44 @@ class IP2LocationRecord:
     def __repr__(self):
         return repr(self.__dict__)
 
+
 MAX_IPV4_RANGE = 4294967295
 MAX_IPV6_RANGE = 340282366920938463463374607431768211455
 
-_COUNTRY_POSITION             = (0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2)
-_REGION_POSITION              = (0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3)
-_CITY_POSITION                = (0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4)
-_ISP_POSITION                 = (0, 0, 3, 0, 5, 0, 7, 5, 7, 0, 8, 0, 9, 0, 9, 0, 9, 0, 9, 7, 9, 0, 9, 7, 9)
-_LATITUDE_POSITION            = (0, 0, 0, 0, 0, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5)
-_LONGITUDE_POSITION           = (0, 0, 0, 0, 0, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6)
-_DOMAIN_POSITION              = (0, 0, 0, 0, 0, 0, 0, 6, 8, 0, 9, 0, 10,0, 10, 0, 10, 0, 10, 8, 10, 0, 10, 8, 10)
-_ZIPCODE_POSITION             = (0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 7, 0, 7, 7, 7, 0, 7, 0, 7, 7, 7, 0, 7)
-_TIMEZONE_POSITION            = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 7, 8, 8, 8, 7, 8, 0, 8, 8, 8, 0, 8)
-_NETSPEED_POSITION            = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 11,0, 11,8, 11, 0, 11, 0, 11, 0, 11)
-_IDDCODE_POSITION             = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 12, 0, 12, 0, 12, 9, 12, 0, 12)
-_AREACODE_POSITION            = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10 ,13 ,0, 13, 0, 13, 10, 13, 0, 13)
-_WEATHERSTATIONCODE_POSITION  = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 14, 0, 14, 0, 14, 0, 14)
-_WEATHERSTATIONNAME_POSITION  = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 15, 0, 15, 0, 15, 0, 15)
-_MCC_POSITION                 = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 16, 0, 16, 9, 16)
-_MNC_POSITION                 = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10,17, 0, 17, 10, 17)
-_MOBILEBRAND_POSITION         = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11,18, 0, 18, 11, 18)
-_ELEVATION_POSITION           = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 19, 0, 19)
-_USAGETYPE_POSITION           = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 20)
+# fmt: off
+_COUNTRY_POSITION            = (0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,  2, 2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2)
+_REGION_POSITION             = (0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,  3, 3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3)
+_CITY_POSITION               = (0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,  4, 4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4)
+_ISP_POSITION                = (0, 0, 3, 0, 5, 0, 7, 5, 7, 0, 8, 0, 9,  0, 9,  0,  9,  0,  9,  7,  9,  0,  9,  7,  9)
+_LATITUDE_POSITION           = (0, 0, 0, 0, 0, 5, 5, 0, 5, 5, 5, 5, 5,  5, 5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5)
+_LONGITUDE_POSITION          = (0, 0, 0, 0, 0, 6, 6, 0, 6, 6, 6, 6, 6,  6, 6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6)
+_DOMAIN_POSITION             = (0, 0, 0, 0, 0, 0, 0, 6, 8, 0, 9, 0, 10, 0, 10, 0,  10, 0,  10, 8,  10, 0,  10, 8,  10)
+_ZIPCODE_POSITION            = (0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 7,  0, 7,  7,  7,  0,  7,  0,  7,  7,  7,  0,  7)
+_TIMEZONE_POSITION           = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 8,  7, 8,  8,  8,  7,  8,  0,  8,  8,  8,  0,  8)
+_NETSPEED_POSITION           = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  8, 11, 0,  11, 8,  11, 0,  11, 0,  11, 0,  11)
+_IDDCODE_POSITION            = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,  9,  12, 0,  12, 0,  12, 9,  12, 0,  12)
+_AREACODE_POSITION           = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,  10, 13, 0,  13, 0,  13, 10, 13, 0,  13)
+_WEATHERSTATIONCODE_POSITION = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,  0,  0,  9,  14, 0,  14, 0,  14, 0,  14)
+_WEATHERSTATIONNAME_POSITION = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,  0,  0,  10, 15, 0,  15, 0,  15, 0,  15)
+_MCC_POSITION                = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,  0,  0,  0,  0,  9,  16, 0,  16, 9,  16)
+_MNC_POSITION                = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,  0,  0,  0,  0,  10, 17, 0,  17, 10, 17)
+_MOBILEBRAND_POSITION        = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,  0,  0,  0,  0,  11, 18, 0,  18, 11, 18)
+_ELEVATION_POSITION          = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,  0,  0,  0,  0,  0,  0,  11, 19, 0,  19)
+_USAGETYPE_POSITION          = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  12, 20)
+# fmt: on
+
 
 class IP2Location(object):
-    ''' IP2Location database '''
+    """ IP2Location database """
 
-    def __init__(self, filename=None,mode='FILE_IO'):
-        ''' Creates a database object and opens a file if filename is given
-            
-        '''
+    def __init__(self, filename=None, mode="FILE_IO"):
+        """Creates a database object and opens a file if filename is given"""
         self.mode = mode
         if filename:
             self.open(filename)
 
     def __enter__(self):
-        if not hasattr(self, '_f') or self._f.closed:
+        if not hasattr(self, "_f") or self._f.closed:
             raise ValueError("Cannot enter context with closed file")
         return self
 
@@ -139,171 +160,197 @@ class IP2Location(object):
         self.close()
 
     def open(self, filename):
-        ''' Opens a database file '''
+        """ Opens a database file """
         # Ensure old file is closed before opening a new one
         self.close()
 
-        if (self.mode == 'SHARED_MEMORY'):
+        if self.mode == "SHARED_MEMORY":
             import mmap
-            db1 = open(filename, 'r+b')
+
+            db1 = open(filename, "r+b")
             self._f = mmap.mmap(db1.fileno(), 0)
             db1.close()
             del db1
-        elif (self.mode == 'FILE_IO'):
-            self._f = open(filename, 'rb')
+        elif self.mode == "FILE_IO":
+            self._f = open(filename, "rb")
         else:
-            raise ValueError("Invalid mode. Please enter either FILE_IO or SHARED_MEMORY.")
-        self._dbtype = struct.unpack('B', self._f.read(1))[0]
-        self._dbcolumn = struct.unpack('B', self._f.read(1))[0]
-        self._dbyear = struct.unpack('B', self._f.read(1))[0]
-        self._dbmonth = struct.unpack('B', self._f.read(1))[0]
-        self._dbday = struct.unpack('B', self._f.read(1))[0]
-        self._ipv4dbcount = struct.unpack('<I', self._f.read(4))[0]
-        self._ipv4dbaddr = struct.unpack('<I', self._f.read(4))[0]
-        self._ipv6dbcount = struct.unpack('<I', self._f.read(4))[0]
-        self._ipv6dbaddr = struct.unpack('<I', self._f.read(4))[0]
-        self._ipv4indexbaseaddr = struct.unpack('<I', self._f.read(4))[0]
-        self._ipv6indexbaseaddr = struct.unpack('<I', self._f.read(4))[0]
-
+            raise ValueError(
+                "Invalid mode. Please enter either FILE_IO or SHARED_MEMORY."
+            )
+        self._dbtype = struct.unpack("B", self._f.read(1))[0]
+        self._dbcolumn = struct.unpack("B", self._f.read(1))[0]
+        self._dbyear = struct.unpack("B", self._f.read(1))[0]
+        self._dbmonth = struct.unpack("B", self._f.read(1))[0]
+        self._dbday = struct.unpack("B", self._f.read(1))[0]
+        self._ipv4dbcount = struct.unpack("<I", self._f.read(4))[0]
+        self._ipv4dbaddr = struct.unpack("<I", self._f.read(4))[0]
+        self._ipv6dbcount = struct.unpack("<I", self._f.read(4))[0]
+        self._ipv6dbaddr = struct.unpack("<I", self._f.read(4))[0]
+        self._ipv4indexbaseaddr = struct.unpack("<I", self._f.read(4))[0]
+        self._ipv6indexbaseaddr = struct.unpack("<I", self._f.read(4))[0]
 
     def close(self):
-        if hasattr(self, '_f'):
+        if hasattr(self, "_f"):
             # If there is file close it.
             self._f.close()
             del self._f
 
     def get_country_short(self, ip):
-        ''' Get country_short '''
+        """ Get country_short """
         rec = self.get_all(ip)
         return rec and rec.country_short
+
     def get_country_long(self, ip):
-        ''' Get country_long '''
+        """ Get country_long """
         rec = self.get_all(ip)
         return rec and rec.country_long
+
     def get_region(self, ip):
-        ''' Get region '''
+        """ Get region """
         rec = self.get_all(ip)
         return rec and rec.region
+
     def get_city(self, ip):
-        ''' Get city '''
+        """ Get city """
         rec = self.get_all(ip)
         return rec and rec.city
+
     def get_isp(self, ip):
-        ''' Get isp '''
+        """ Get isp """
         rec = self.get_all(ip)
         return rec and rec.isp
+
     def get_latitude(self, ip):
-        ''' Get latitude '''
+        """ Get latitude """
         rec = self.get_all(ip)
         return rec and rec.latitude
+
     def get_longitude(self, ip):
-        ''' Get longitude '''
+        """ Get longitude """
         rec = self.get_all(ip)
         return rec and rec.longitude
+
     def get_domain(self, ip):
-        ''' Get domain '''
+        """ Get domain """
         rec = self.get_all(ip)
         return rec and rec.domain
+
     def get_zipcode(self, ip):
-        ''' Get zipcode '''
+        """ Get zipcode """
         rec = self.get_all(ip)
         return rec and rec.zipcode
+
     def get_timezone(self, ip):
-        ''' Get timezone '''
+        """ Get timezone """
         rec = self.get_all(ip)
         return rec and rec.timezone
+
     def get_netspeed(self, ip):
-        ''' Get netspeed '''
+        """ Get netspeed """
         rec = self.get_all(ip)
         return rec and rec.netspeed
+
     def get_idd_code(self, ip):
-        ''' Get idd_code '''
+        """ Get idd_code """
         rec = self.get_all(ip)
         return rec and rec.idd_code
+
     def get_area_code(self, ip):
-        ''' Get area_code '''
+        """ Get area_code """
         rec = self.get_all(ip)
         return rec and rec.area_code
+
     def get_weather_code(self, ip):
-        ''' Get weather_code '''
+        """ Get weather_code """
         rec = self.get_all(ip)
         return rec and rec.weather_code
+
     def get_weather_name(self, ip):
-        ''' Get weather_name '''
+        """ Get weather_name """
         rec = self.get_all(ip)
         return rec and rec.weather_name
+
     def get_mcc(self, ip):
-        ''' Get mcc '''
+        """ Get mcc """
         rec = self.get_all(ip)
         return rec and rec.mcc
+
     def get_mnc(self, ip):
-        ''' Get mnc '''
+        """ Get mnc """
         rec = self.get_all(ip)
         return rec and rec.mnc
+
     def get_mobile_brand(self, ip):
-        ''' Get mobile_brand '''
+        """ Get mobile_brand """
         rec = self.get_all(ip)
         return rec and rec.mobile_brand
+
     def get_elevation(self, ip):
-        ''' Get elevation '''
+        """ Get elevation """
         rec = self.get_all(ip)
         return rec and rec.elevation
+
     def get_usage_type(self, ip):
-        ''' Get usage_type '''
+        """ Get usage_type """
         rec = self.get_all(ip)
         return rec and rec.usage_type
 
     def get_all(self, addr):
-        ''' Get the whole record with all fields read from the file
+        """Get the whole record with all fields read from the file
 
-            Arguments:
+        Arguments:
 
-            addr: IPv4 or IPv6 address as a string
-     
-            Returns IP2LocationRecord or None if address not found in file
-        '''
+        addr: IPv4 or IPv6 address as a string
+
+        Returns IP2LocationRecord or None if address not found in file
+        """
         return self._get_record(addr)
 
     def find(self, addr):
-        ''' Get the whole record with all fields read from the file
+        """Get the whole record with all fields read from the file
 
-            Arguments:
+        Arguments:
 
-            addr: IPv4 or IPv6 address as a string
-     
-            Returns IP2LocationRecord or None if address not found in file
-			
-			This function will be obselete in future.
-        '''
+        addr: IPv4 or IPv6 address as a string
+
+        Returns IP2LocationRecord or None if address not found in file
+
+                    This function will be obselete in future.
+        """
         return self._get_record(addr)
 
     def _reads(self, offset):
         self._f.seek(offset - 1)
-        n = struct.unpack('B', self._f.read(1))[0]
+        n = struct.unpack("B", self._f.read(1))[0]
         # return u(self._f.read(n))
-        if sys.version < '3':
-            return str(self._f.read(n).decode('iso-8859-1').encode('utf-8'))
-        else :
-            return u(self._f.read(n).decode('iso-8859-1').encode('utf-8'))
+        if sys.version < "3":
+            return str(self._f.read(n).decode("iso-8859-1").encode("utf-8"))
+        else:
+            return u(self._f.read(n).decode("iso-8859-1").encode("utf-8"))
 
     def _readi(self, offset):
         self._f.seek(offset - 1)
-        return struct.unpack('<I', self._f.read(4))[0]
+        return struct.unpack("<I", self._f.read(4))[0]
 
     def _readf(self, offset):
         self._f.seek(offset - 1)
-        return struct.unpack('<f', self._f.read(4))[0]
+        return struct.unpack("<f", self._f.read(4))[0]
 
     def _readip(self, offset, ipv):
         if ipv == 4:
             return self._readi(offset)
         elif ipv == 6:
-            a, b, c, d = self._readi(offset), self._readi(offset + 4), self._readi(offset + 8), self._readi(offset + 12) 
+            a, b, c, d = (
+                self._readi(offset),
+                self._readi(offset + 4),
+                self._readi(offset + 8),
+                self._readi(offset + 12),
+            )
             return (d << 96) | (c << 64) | (b << 32) | a
 
     def _readips(self, offset, ipv):
         if ipv == 4:
-            return socket.inet_ntoa(struct.pack('!L', self._readi(offset)))
+            return socket.inet_ntoa(struct.pack("!L", self._readi(offset)))
         elif ipv == 6:
             return str(self._readip(offset, ipv))
 
@@ -320,74 +367,276 @@ class IP2Location(object):
             dbcolumn_width = self._dbcolumn * 4
 
         def calc_off(what, mid):
-            return baseaddr + mid * (self._dbcolumn * 4 + off) + off + 4 * (what[self._dbtype]-1)
+            return (
+                baseaddr
+                + mid * (self._dbcolumn * 4 + off)
+                + off
+                + 4 * (what[self._dbtype] - 1)
+            )
 
-        if (self.mode == 'SHARED_MEMORY'):
+        if self.mode == "SHARED_MEMORY":
             # We can directly use slice notation to read content from mmap object. https://docs.python.org/3/library/mmap.html?highlight=mmap#module-mmap
-            raw_positions_row = self._f[ (calc_off(_COUNTRY_POSITION, mid)) - 1 : (calc_off(_COUNTRY_POSITION, mid)) - 1 + dbcolumn_width]
+            raw_positions_row = self._f[
+                (calc_off(_COUNTRY_POSITION, mid))
+                - 1 : (calc_off(_COUNTRY_POSITION, mid))
+                - 1
+                + dbcolumn_width
+            ]
         else:
             self._f.seek((calc_off(_COUNTRY_POSITION, mid)) - 1)
             raw_positions_row = self._f.read(dbcolumn_width)
 
-        if self.original_ip != '':
+        if self.original_ip != "":
             rec.ip = self.original_ip
         else:
             rec.ip = self._readips(baseaddr + (mid) * self._dbcolumn * 4, ipv)
 
         if _COUNTRY_POSITION[self._dbtype] != 0:
-            rec.country_short = self._reads(struct.unpack('<I', raw_positions_row[0 : ((_COUNTRY_POSITION[self._dbtype]-1) * 4)])[0] + 1)
-            rec.country_long =  self._reads(struct.unpack('<I', raw_positions_row[0 : ((_COUNTRY_POSITION[self._dbtype]-1) * 4)])[0] + 4)
+            rec.country_short = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[0 : ((_COUNTRY_POSITION[self._dbtype] - 1) * 4)],
+                )[0]
+                + 1
+            )
+            rec.country_long = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[0 : ((_COUNTRY_POSITION[self._dbtype] - 1) * 4)],
+                )[0]
+                + 4
+            )
 
         if _REGION_POSITION[self._dbtype] != 0:
-            rec.region = self._reads(struct.unpack('<I', raw_positions_row[((_REGION_POSITION[self._dbtype]-1) * 4 - 4) : ((_REGION_POSITION[self._dbtype]-1) * 4)])[0] + 1)
+            rec.region = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_REGION_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_REGION_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
         if _CITY_POSITION[self._dbtype] != 0:
-            rec.city = self._reads(struct.unpack('<I', raw_positions_row[((_CITY_POSITION[self._dbtype]-1) * 4 - 4) : ((_CITY_POSITION[self._dbtype]-1) * 4)])[0] + 1)
+            rec.city = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_CITY_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_CITY_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
         if _ISP_POSITION[self._dbtype] != 0:
-            rec.isp = self._reads(struct.unpack('<I', raw_positions_row[((_ISP_POSITION[self._dbtype]-1) * 4 - 4) : ((_ISP_POSITION[self._dbtype]-1) * 4)])[0] + 1)
+            rec.isp = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_ISP_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_ISP_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
 
         if _LATITUDE_POSITION[self._dbtype] != 0:
-            rec.latitude = round(struct.unpack('<f', raw_positions_row[((_LATITUDE_POSITION[self._dbtype]-1) * 4 - 4) : ((_LATITUDE_POSITION[self._dbtype]-1) * 4)])[0], 6)
+            rec.latitude = round(
+                struct.unpack(
+                    "<f",
+                    raw_positions_row[
+                        ((_LATITUDE_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_LATITUDE_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0],
+                6,
+            )
         if _LONGITUDE_POSITION[self._dbtype] != 0:
-            rec.longitude = round(struct.unpack('<f', raw_positions_row[((_LONGITUDE_POSITION[self._dbtype]-1) * 4 - 4) : ((_LONGITUDE_POSITION[self._dbtype]-1) * 4)])[0], 6)
+            rec.longitude = round(
+                struct.unpack(
+                    "<f",
+                    raw_positions_row[
+                        ((_LONGITUDE_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_LONGITUDE_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0],
+                6,
+            )
 
         if _DOMAIN_POSITION[self._dbtype] != 0:
-            rec.domain = self._reads(struct.unpack('<I', raw_positions_row[((_DOMAIN_POSITION[self._dbtype]-1) * 4 - 4) : ((_DOMAIN_POSITION[self._dbtype]-1) * 4)])[0] + 1)
+            rec.domain = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_DOMAIN_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_DOMAIN_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
 
         if _ZIPCODE_POSITION[self._dbtype] != 0:
-            rec.zipcode = self._reads(struct.unpack('<I', raw_positions_row[((_ZIPCODE_POSITION[self._dbtype]-1) * 4 - 4) : ((_ZIPCODE_POSITION[self._dbtype]-1) * 4)])[0] + 1)
+            rec.zipcode = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_ZIPCODE_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_ZIPCODE_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
 
         if _TIMEZONE_POSITION[self._dbtype] != 0:
-            rec.timezone = self._reads(struct.unpack('<I', raw_positions_row[((_TIMEZONE_POSITION[self._dbtype]-1) * 4 - 4) : ((_TIMEZONE_POSITION[self._dbtype]-1) * 4)])[0] + 1)
-                
+            rec.timezone = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_TIMEZONE_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_TIMEZONE_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
+
         if _NETSPEED_POSITION[self._dbtype] != 0:
-            rec.netspeed = self._reads(struct.unpack('<I', raw_positions_row[((_NETSPEED_POSITION[self._dbtype]-1) * 4 - 4) : ((_NETSPEED_POSITION[self._dbtype]-1) * 4)])[0] + 1)
+            rec.netspeed = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_NETSPEED_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_NETSPEED_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
 
         if _IDDCODE_POSITION[self._dbtype] != 0:
-            rec.idd_code = self._reads(struct.unpack('<I', raw_positions_row[((_IDDCODE_POSITION[self._dbtype]-1) * 4 - 4) : ((_IDDCODE_POSITION[self._dbtype]-1) * 4)])[0] + 1)
+            rec.idd_code = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_IDDCODE_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_IDDCODE_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
 
         if _AREACODE_POSITION[self._dbtype] != 0:
-            rec.area_code = self._reads(struct.unpack('<I', raw_positions_row[((_AREACODE_POSITION[self._dbtype]-1) * 4 - 4) : ((_AREACODE_POSITION[self._dbtype]-1) * 4)])[0] + 1)
+            rec.area_code = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_AREACODE_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_AREACODE_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
 
         if _WEATHERSTATIONCODE_POSITION[self._dbtype] != 0:
-            rec.weather_code = self._reads(struct.unpack('<I', raw_positions_row[((_WEATHERSTATIONCODE_POSITION[self._dbtype]-1) * 4 - 4) : ((_WEATHERSTATIONCODE_POSITION[self._dbtype]-1) * 4)])[0] + 1)
+            rec.weather_code = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_WEATHERSTATIONCODE_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_WEATHERSTATIONCODE_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
 
         if _WEATHERSTATIONNAME_POSITION[self._dbtype] != 0:
-            rec.weather_name = self._reads(struct.unpack('<I', raw_positions_row[((_WEATHERSTATIONNAME_POSITION[self._dbtype]-1) * 4 - 4) : ((_WEATHERSTATIONNAME_POSITION[self._dbtype]-1) * 4)])[0] + 1)
+            rec.weather_name = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_WEATHERSTATIONNAME_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_WEATHERSTATIONNAME_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
 
         if _MCC_POSITION[self._dbtype] != 0:
-            rec.mcc = self._reads(struct.unpack('<I', raw_positions_row[((_MCC_POSITION[self._dbtype]-1) * 4 - 4) : ((_MCC_POSITION[self._dbtype]-1) * 4)])[0] + 1)
+            rec.mcc = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_MCC_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_MCC_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
 
         if _MNC_POSITION[self._dbtype] != 0:
-            rec.mnc = self._reads(struct.unpack('<I', raw_positions_row[((_MNC_POSITION[self._dbtype]-1) * 4 - 4) : ((_MNC_POSITION[self._dbtype]-1) * 4)])[0] + 1)
+            rec.mnc = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_MNC_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_MNC_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
 
         if _MOBILEBRAND_POSITION[self._dbtype] != 0:
-            rec.mobile_brand = self._reads(struct.unpack('<I', raw_positions_row[((_MOBILEBRAND_POSITION[self._dbtype]-1) * 4 - 4) : ((_MOBILEBRAND_POSITION[self._dbtype]-1) * 4)])[0] + 1)
-                
+            rec.mobile_brand = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_MOBILEBRAND_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_MOBILEBRAND_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
+
         if _ELEVATION_POSITION[self._dbtype] != 0:
-            rec.elevation = self._reads(struct.unpack('<I', raw_positions_row[((_ELEVATION_POSITION[self._dbtype]-1) * 4 - 4) : ((_ELEVATION_POSITION[self._dbtype]-1) * 4)])[0] + 1)
+            rec.elevation = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_ELEVATION_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_ELEVATION_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
 
         if _USAGETYPE_POSITION[self._dbtype] != 0:
-            rec.usage_type = self._reads(struct.unpack('<I', raw_positions_row[((_USAGETYPE_POSITION[self._dbtype]-1) * 4 - 4) : ((_USAGETYPE_POSITION[self._dbtype]-1) * 4)])[0] + 1)
+            rec.usage_type = self._reads(
+                struct.unpack(
+                    "<I",
+                    raw_positions_row[
+                        ((_USAGETYPE_POSITION[self._dbtype] - 1) * 4 - 4) : (
+                            (_USAGETYPE_POSITION[self._dbtype] - 1) * 4
+                        )
+                    ],
+                )[0]
+                + 1
+            )
 
         return rec
 
@@ -402,55 +651,59 @@ class IP2Location(object):
             yield self._read_record(low, 6)
             low += 1
 
-    def _parse_addr(self, addr): 
-        ''' Parses address and returns IP version. Raises exception on invalid argument '''
+    def _parse_addr(self, addr):
+        """ Parses address and returns IP version. Raises exception on invalid argument """
         ipv = 0
         try:
             # socket.inet_pton(socket.AF_INET6, addr)
-            a, b = struct.unpack('!QQ', socket.inet_pton(socket.AF_INET6, addr))
+            a, b = struct.unpack("!QQ", socket.inet_pton(socket.AF_INET6, addr))
             ipnum = (a << 64) | b
             # Convert ::FFFF:x.y.z.y to IPv4
-            if addr.lower().startswith('::ffff:'):
+            if addr.lower().startswith("::ffff:"):
                 try:
                     socket.inet_pton(socket.AF_INET, addr)
                     ipv = 4
                 except:
-                    # reformat ipv4 address in ipv6 
-                    if ((ipnum >= 281470681743360) and (ipnum <= 281474976710655)):
+                    # reformat ipv4 address in ipv6
+                    if (ipnum >= 281470681743360) and (ipnum <= 281474976710655):
                         ipv = 4
                         ipnum = ipnum - 281470681743360
                     else:
                         ipv = 6
             else:
-                #reformat 6to4 address to ipv4 address 2002:: to 2002:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF
-                if ((ipnum >= 42545680458834377588178886921629466624) and (ipnum <= 42550872755692912415807417417958686719)):
+                # reformat 6to4 address to ipv4 address 2002:: to 2002:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF
+                if (ipnum >= 42545680458834377588178886921629466624) and (
+                    ipnum <= 42550872755692912415807417417958686719
+                ):
                     ipv = 4
                     ipnum = ipnum >> 80
                     ipnum = ipnum % 4294967296
-                #reformat Teredo address to ipv4 address 2001:0000:: to 2001:0000:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:
-                elif ((ipnum >= 42540488161975842760550356425300246528) and (ipnum <= 42540488241204005274814694018844196863)):
+                # reformat Teredo address to ipv4 address 2001:0000:: to 2001:0000:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:
+                elif (ipnum >= 42540488161975842760550356425300246528) and (
+                    ipnum <= 42540488241204005274814694018844196863
+                ):
                     ipv = 4
-                    ipnum = ~ ipnum
+                    ipnum = ~ipnum
                     ipnum = ipnum % 4294967296
                 else:
                     ipv = 6
         except:
-            ipnum = struct.unpack('!L', socket.inet_pton(socket.AF_INET, addr))[0]
+            ipnum = struct.unpack("!L", socket.inet_pton(socket.AF_INET, addr))[0]
             # socket.inet_pton(socket.AF_INET, addr)
             ipv = 4
         return ipv, ipnum
-        
+
     def _get_record(self, ip):
 
         # global original_ip
         self.original_ip = ip
         low = 0
-        # ipv = self._parse_addr(ip) 
-        ipv = self._parse_addr(ip)[0] 
-        ipnum = self._parse_addr(ip)[1] 
+        # ipv = self._parse_addr(ip)
+        ipv = self._parse_addr(ip)[0]
+        ipnum = self._parse_addr(ip)[1]
         if ipv == 4:
             # ipno = struct.unpack('!L', socket.inet_pton(socket.AF_INET, ip))[0]
-            if (ipnum == MAX_IPV4_RANGE):
+            if ipnum == MAX_IPV4_RANGE:
                 ipno = ipnum - 1
             else:
                 ipno = ipnum
@@ -464,10 +717,10 @@ class IP2Location(object):
 
         elif ipv == 6:
             if self._ipv6dbcount == 0:
-                raise ValueError('Please use IPv6 BIN file for IPv6 Address.')
+                raise ValueError("Please use IPv6 BIN file for IPv6 Address.")
             # a, b = struct.unpack('!QQ', socket.inet_pton(socket.AF_INET6, ip))
             # ipno = (a << 64) | b
-            if (ipnum == MAX_IPV6_RANGE):
+            if ipnum == MAX_IPV6_RANGE:
                 ipno = ipnum - 1
             else:
                 ipno = ipnum
@@ -492,36 +745,47 @@ class IP2Location(object):
                 else:
                     low = mid + 1
 
+
 class IP2LocationWebService(object):
-    ''' IP2Location web service '''
-    def __init__(self,apikey,package,usessl=True):
-        if ((re.match(r"^[0-9A-Z]{10}$", apikey) == None) and (apikey != 'demo')):
+    """ IP2Location web service """
+
+    def __init__(self, apikey, package, usessl=True):
+        if (re.match(r"^[0-9A-Z]{10}$", apikey) == None) and (apikey != "demo"):
             raise ValueError("Please provide a valid IP2Location web service API key.")
-        if (re.match(r"^WS[0-9]+$", package) == None):
-            package = 'WS1'
+        if re.match(r"^WS[0-9]+$", package) == None:
+            package = "WS1"
         self.apikey = apikey
         self.package = package
         self.usessl = usessl
-    
-    def lookup(self,ip,addons=[],language='en'):
-        '''This function will look the given IP address up in IP2Location web service.'''
-        parameters = urlencode((("key", self.apikey), ("ip", ip), ("package", self.package), ("addon", ','.join(addons)), ("lang", language)))
+
+    def lookup(self, ip, addons=[], language="en"):
+        """This function will look the given IP address up in IP2Location web service."""
+        parameters = urlencode(
+            (
+                ("key", self.apikey),
+                ("ip", ip),
+                ("package", self.package),
+                ("addon", ",".join(addons)),
+                ("lang", language),
+            )
+        )
         response = httprequest(parameters, self.usessl)
-        if (response == None):
+        if response == None:
             return False
-        if ('response' in response):
-            raise IP2LocationAPIError(response['response'])
+        if "response" in response:
+            raise IP2LocationAPIError(response["response"])
         return response
 
     def getcredit(self):
-        '''Get the remaing credit in your IP2Location web service account.'''
+        """Get the remaing credit in your IP2Location web service account."""
         parameters = urlencode((("key", self.apikey), ("check", True)))
         response = httprequest(parameters, self.usessl)
-        if (response == None):
+        if response == None:
             return 0
-        if ('response' in response is False):
+        if "response" in response is False:
             return 0
-        return response['response']
-  
+        return response["response"]
+
+
 class IP2LocationAPIError(Exception):
     """Raise for IP2Location API Error Message"""
