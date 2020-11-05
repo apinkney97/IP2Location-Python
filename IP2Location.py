@@ -678,9 +678,8 @@ class IP2Location(object):
         # global original_ip
         self.original_ip = ip
         low = 0
-        # ipv = self._parse_addr(ip)
-        ipv = self._parse_addr(ip)[0]
-        ipnum = self._parse_addr(ip)[1]
+        ipv, ipnum = self._parse_addr(ip)
+
         if ipv == 4:
             # ipno = struct.unpack('!L', socket.inet_pton(socket.AF_INET, ip))[0]
             if ipnum == MAX_IPV4_RANGE:
