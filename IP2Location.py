@@ -645,23 +645,19 @@ class IP2Location(object):
                     ipv = 4
                 except Exception:
                     # reformat ipv4 address in ipv6
-                    if (ipnum >= 0xFFFF00000000) and (ipnum <= 0xFFFFFFFFFFFF):
+                    if 0xFFFF00000000 <= ipnum <= 0xFFFFFFFFFFFF:
                         ipv = 4
                         ipnum = ipnum - 0xFFFF00000000
                     else:
                         ipv = 6
             else:
                 # reformat 6to4 address to ipv4 address 2002:: to 2002:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF
-                if (ipnum >= 0x20020000000000000000000000000000) and (
-                    ipnum <= 0x2002FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-                ):
+                if 0x20020000000000000000000000000000<= ipnum <= 0x2002FFFFFFFFFFFFFFFFFFFFFFFFFFFF:
                     ipv = 4
                     ipnum = ipnum >> 80
                     ipnum = ipnum % 4294967296
                 # reformat Teredo address to ipv4 address 2001:0000:: to 2001:0000:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:
-                elif (ipnum >= 0x20010000000000000000000000000000) and (
-                    ipnum <= 0x20010000FFFFFFFFFFFFFFFFFFFFFFFF
-                ):
+                elif 0x20010000000000000000000000000000 <= ipnum <= 0x20010000FFFFFFFFFFFFFFFFFFFFFFFF:
                     ipv = 4
                     ipnum = ~ipnum
                     ipnum = ipnum % (2**32)
