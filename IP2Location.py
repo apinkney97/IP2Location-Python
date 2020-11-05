@@ -116,8 +116,8 @@ class IP2LocationRecord:
         return repr(self.__dict__)
 
 
-MAX_IPV4_RANGE = 4294967295
-MAX_IPV6_RANGE = 340282366920938463463374607431768211455
+MAX_IPV4_RANGE = 2**32 - 1
+MAX_IPV6_RANGE = 2**128 - 1
 
 # fmt: off
 _COUNTRY_POSITION            = (0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,  2, 2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2)
@@ -645,26 +645,26 @@ class IP2Location(object):
                     ipv = 4
                 except Exception:
                     # reformat ipv4 address in ipv6
-                    if (ipnum >= 281470681743360) and (ipnum <= 281474976710655):
+                    if (ipnum >= 0xFFFF00000000) and (ipnum <= 0xFFFFFFFFFFFF):
                         ipv = 4
-                        ipnum = ipnum - 281470681743360
+                        ipnum = ipnum - 0xFFFF00000000
                     else:
                         ipv = 6
             else:
                 # reformat 6to4 address to ipv4 address 2002:: to 2002:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF
-                if (ipnum >= 42545680458834377588178886921629466624) and (
-                    ipnum <= 42550872755692912415807417417958686719
+                if (ipnum >= 0x20020000000000000000000000000000) and (
+                    ipnum <= 0x2002FFFFFFFFFFFFFFFFFFFFFFFFFFFF
                 ):
                     ipv = 4
                     ipnum = ipnum >> 80
                     ipnum = ipnum % 4294967296
                 # reformat Teredo address to ipv4 address 2001:0000:: to 2001:0000:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:
-                elif (ipnum >= 42540488161975842760550356425300246528) and (
-                    ipnum <= 42540488241204005274814694018844196863
+                elif (ipnum >= 0x20010000000000000000000000000000) and (
+                    ipnum <= 0x20010000FFFFFFFFFFFFFFFFFFFFFFFF
                 ):
                     ipv = 4
                     ipnum = ~ipnum
-                    ipnum = ipnum % 4294967296
+                    ipnum = ipnum % (2**32)
                 else:
                     ipv = 6
         except Exception:
